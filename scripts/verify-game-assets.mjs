@@ -107,6 +107,10 @@ const saveSystem = readText("src/systems/SaveSystem.ts");
 const roomArrange = readText("src/scenes/RoomArrangeScene.ts");
 const mainRoom = readText("src/scenes/MainRoomScene.ts");
 const gameConfig = readText("src/game/config.ts");
+const openingStory = readText("src/scenes/OpeningStoryScene.ts");
+const openingReply = readText("src/systems/OpeningReplySystem.ts");
+const letterScene = readText("src/scenes/LetterScene.ts");
+const settingsScene = readText("src/scenes/SettingsScene.ts");
 const packageJson = readText("package.json");
 const indexHtml = readText("index.html");
 
@@ -115,6 +119,25 @@ expect(packageJson.includes("vite build --base=/petpet/"), "Production build sho
 expect(indexHtml.includes("<title>petpet</title>"), "index.html title should be petpet");
 expect(assetKeys.includes("StartHero"), "AssetKeys should include the cleaned start screen hero");
 expect(assetKeys.includes("HomeBackground"), "AssetKeys should include the new home background");
+expect(defaultSave.includes("SAVE_VERSION = 8"), "SAVE_VERSION should force old saves into the new opening flow");
+expect(defaultSave.includes("isFirstLaunch: true"), "New saves should start at the opening story");
+expect(defaultSave.includes("openingStoryCompleted: false"), "New saves should not skip the opening story");
+expect(defaultSave.includes("seedPlanted: false"), "New saves should wait for the opening seed planting");
+expect(saveSystem.includes("if ((data.version ?? 0) < SAVE_VERSION)") && saveSystem.includes("return reset"), "Old saves should reset to Day 1 and replay the opening story");
+expect(gameConfig.includes("OpeningStoryScene"), "OpeningStoryScene should be registered in the Phaser scene list");
+for (const text of ["打开信封", "看看种子", "种进花盆", "开始照顾它"]) {
+  expect(openingStory.includes(text), `Opening story should include ${text}`);
+}
+for (const text of ["isFirstLaunch = false", "openingStoryCompleted = true", "seedPlanted = true", "dayCount = 1"]) {
+  expect(openingStory.includes(text), `Opening story should save ${text}`);
+}
+for (const text of ["今天想对这颗种子说些什么？", "寄出第一封信", "信已经放在花盆旁边了"]) {
+  expect(letterScene.includes(text), `First letter flow should include ${text}`);
+}
+for (const text of ["给照顾我的你", "给路过这里的你", "firstReplyRead = true"]) {
+  expect(openingReply.includes(text), `Opening reply flow should include ${text}`);
+}
+expect(settingsScene.includes("GameFlowSystem.getEntryScene(save)"), "Restart should return to the opening flow through GameFlowSystem");
 for (const iconKey of ["IconHome", "IconArrange", "IconCollection", "IconLetter", "IconSettings", "IconRecord"]) {
   expect(assetKeys.includes(iconKey), `AssetKeys should include UI.${iconKey}`);
 }

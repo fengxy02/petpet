@@ -164,6 +164,10 @@ export type SaveData = {
   createdAt: string;
   lastLoginDate: string;
   currentDate: string;
+  isFirstLaunch: boolean;
+  openingStoryCompleted: boolean;
+  firstLetterGuideShown: boolean;
+  firstReplyRead: boolean;
   dayCount: number;
   seedPlanted: boolean;
   growthStage: GrowthStage;

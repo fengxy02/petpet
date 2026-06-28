@@ -4,6 +4,7 @@ export class SummarySystem {
   static needsSummary(save: SaveData): boolean {
     const sourceDay = save.dayCount - 1;
     if (sourceDay < 1) return false;
+    if (sourceDay === 1 && save.openingStoryCompleted) return false;
     return save.letters.some((letter) => letter.day === sourceDay) && !save.summaries.some((summary) => summary.sourceDay === sourceDay);
   }
 

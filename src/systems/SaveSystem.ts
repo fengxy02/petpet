@@ -37,6 +37,12 @@ export class SaveSystem {
   }
 
   static migrateSaveIfNeeded(data: Partial<SaveData>): SaveData {
+    if ((data.version ?? 0) < SAVE_VERSION) {
+      const reset = createDefaultSave(DateSystem.getLocalDateString());
+      this.saveGame(reset);
+      return reset;
+    }
+
     const base = createDefaultSave(DateSystem.getLocalDateString());
     const stageForLayout = typeof data.dayCount === "number" ? GrowthSystem.getStageForDay(data.dayCount) : (data.growthStage ?? base.growthStage);
     const shouldResetRoomPlacement = (data.version ?? 0) < SAVE_VERSION;
@@ -58,6 +64,11 @@ export class SaveSystem {
       },
       version: SAVE_VERSION
     };
+    const hasCompletedOpening = Boolean(merged.seedPlanted || data.openingStoryCompleted);
+    merged.isFirstLaunch = data.isFirstLaunch ?? !hasCompletedOpening;
+    merged.openingStoryCompleted = data.openingStoryCompleted ?? hasCompletedOpening;
+    merged.firstLetterGuideShown = data.firstLetterGuideShown ?? Boolean(merged.letters.some((letter) => letter.day === 1));
+    merged.firstReplyRead = data.firstReplyRead ?? Boolean(merged.summaries.some((summary) => summary.sourceDay === 1));
     const petPoint = clampPointToSingleFloor(merged.pet);
     merged.pet.x = petPoint.x;
     merged.pet.y = petPoint.y;

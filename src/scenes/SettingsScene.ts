@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { GameFlowSystem } from "../systems/GameFlowSystem";
 import { SaveSystem } from "../systems/SaveSystem";
 import { AudioSettings, UserSettingsSystem } from "../systems/UserSettingsSystem";
 import { AnimalIslandTheme } from "../ui/AnimalIslandTheme";
@@ -143,8 +144,8 @@ export class SettingsScene extends Phaser.Scene {
     new ChoiceModal(this, "\u91cd\u65b0\u5f00\u59cb", "\u8fd9\u4f1a\u6e05\u9664\u5f53\u524d\u5c0f\u5c4b\u8bb0\u5f55\uff0c\u5e76\u5f00\u59cb\u4e00\u6bb5\u65b0\u7684\u65c5\u7a0b\u3002", [
       { label: "\u786e\u8ba4\u91cd\u5f00", onClick: () => {
         SaveSystem.clearSave();
-        SaveSystem.createNewSave();
-        this.scene.start("SeedRitualScene");
+        const save = SaveSystem.createNewSave();
+        this.scene.start(GameFlowSystem.getEntryScene(save));
       } },
       { label: "\u53d6\u6d88", onClick: () => undefined }
     ]);

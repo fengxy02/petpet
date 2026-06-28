@@ -38,8 +38,8 @@ export class StartScene extends Phaser.Scene {
       return;
     }
 
-    SaveSystem.createNewSave();
-    this.scene.start("SeedRitualScene");
+    const newSave = SaveSystem.createNewSave();
+    this.scene.start(GameFlowSystem.getEntryScene(newSave));
   }
 
   private createWobblingLogo(): void {

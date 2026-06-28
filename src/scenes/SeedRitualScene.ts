@@ -45,6 +45,8 @@ export class SeedRitualScene extends Phaser.Scene {
             duration: 90,
             onComplete: () => {
               save.seedPlanted = true;
+              save.isFirstLaunch = false;
+              save.openingStoryCompleted = true;
               save.dayCount = 1;
               save.lastLoginDate = DateSystem.getLocalDateString();
               save.currentDate = save.lastLoginDate;
