@@ -2,7 +2,7 @@ import Phaser from "phaser";
 import { furnitureLabels } from "../data/furnitureDatabase";
 import { FloorId, FurnitureSaveData, FurnitureType } from "../data/types";
 import { AnimalIslandTheme } from "../ui/AnimalIslandTheme";
-import { getFurnitureRotationRadians, getFurnitureTextureKey } from "../utils/AssetKeys";
+import { getFurnitureTextureKey } from "../utils/AssetKeys";
 import { DepthSorter } from "../utils/DepthSorter";
 
 export class Furniture extends Phaser.GameObjects.Container {
@@ -17,7 +17,7 @@ export class Furniture extends Phaser.GameObjects.Container {
     this.item = item;
     this.wallMounted = this.isWallMounted(item);
     this.sprite = scene.add
-      .sprite(0, 0, getFurnitureTextureKey(item.type))
+      .sprite(0, 0, getFurnitureTextureKey(item.type, item.rotation))
       .setOrigin(0.5, this.wallMounted ? 0.5 : 1)
       .setScale(item.scale)
       .setRotation(this.getSpriteRotation());
@@ -57,7 +57,7 @@ export class Furniture extends Phaser.GameObjects.Container {
   syncFromItem(): void {
     this.wallMounted = this.isWallMounted(this.item);
     this.setPosition(this.item.x, this.item.y);
-    this.sprite.setTexture(getFurnitureTextureKey(this.item.type));
+    this.sprite.setTexture(getFurnitureTextureKey(this.item.type, this.item.rotation));
     this.sprite.setOrigin(0.5, this.wallMounted ? 0.5 : 1);
     this.sprite.setScale(this.item.scale);
     this.sprite.setRotation(this.getSpriteRotation());
@@ -82,6 +82,11 @@ export class Furniture extends Phaser.GameObjects.Container {
         return new Phaser.Math.Vector2(4, 34);
       case FurnitureType.Sofa:
         return new Phaser.Math.Vector2(0, 18);
+      case FurnitureType.Rug:
+        return new Phaser.Math.Vector2(0, -8);
+      case FurnitureType.CoffeeTable:
+      case FurnitureType.TvCabinet:
+        return new Phaser.Math.Vector2(0, 26);
       case FurnitureType.Wardrobe:
       case FurnitureType.Bookshelf:
         return new Phaser.Math.Vector2(0, 36);
@@ -91,10 +96,10 @@ export class Furniture extends Phaser.GameObjects.Container {
   }
 
   private isWallMounted(item: FurnitureSaveData): boolean {
-    return item.surface === "wall" || item.type === FurnitureType.Decoration;
+    return item.surface === "wall" || item.type === FurnitureType.Decoration || item.type === FurnitureType.Painting;
   }
 
   private getSpriteRotation(): number {
-    return this.wallMounted ? 0 : getFurnitureRotationRadians(this.item.rotation);
+    return 0;
   }
 }

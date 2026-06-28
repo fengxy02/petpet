@@ -2,7 +2,7 @@ import Phaser from "phaser";
 import { clothingDatabase } from "../data/clothingDatabase";
 import { ClothingSlot, FloorId, FurnitureType, GrowthStage, PetSaveData, PetState, SaveData } from "../data/types";
 import { GameEvents } from "../game/GameEvents";
-import { MushroomAnimationKeys, MushroomFrames } from "../utils/AssetKeys";
+import { getAdultClickAnimationKey, getAdultIdleKey, getAdultPoseKey, getAdultWalkAnimationKey, MushroomAnimationKeys, MushroomFrames } from "../utils/AssetKeys";
 import { DepthSorter } from "../utils/DepthSorter";
 import { weightedPick } from "../utils/MathUtils";
 import { Furniture } from "./Furniture";
@@ -39,7 +39,7 @@ export class Pet extends Phaser.GameObjects.Container {
       this.shadow = shadow;
       this.add(shadow);
     }
-    const texture = MushroomFrames.idle[0];
+    const texture = this.isAdult() ? getAdultIdleKey(this.adultFormId()) : MushroomFrames.idle[0];
     this.sprite = scene.add.sprite(0, 0, texture).setOrigin(0.5, 1).setScale(this.baseSpriteScale());
     this.add(this.sprite);
     if (this.isAdult()) this.applyClothing();
@@ -147,8 +147,9 @@ export class Pet extends Phaser.GameObjects.Container {
       Exercise: [FurnitureType.ExerciseEquipment],
       Play: [FurnitureType.Toy],
       Eat: [FurnitureType.FoodBowl],
-      Rest: [FurnitureType.Sofa],
-      Craft: [FurnitureType.Desk]
+      Rest: [FurnitureType.Sofa, FurnitureType.Rug, FurnitureType.CoffeeTable, FurnitureType.TvCabinet],
+      Craft: [FurnitureType.Desk, FurnitureType.CoffeeTable],
+      Think: [FurnitureType.Pot, FurnitureType.Painting]
     };
     const types = typeMap[action] ?? [];
     return this.room.furniture.find((furniture) => types.includes(furniture.furnitureType));
@@ -197,6 +198,17 @@ export class Pet extends Phaser.GameObjects.Container {
   private applyPetState(state: PetState): void {
     this.save.currentState = state;
     this.stopPoseTweens();
+    if (this.isAdult()) {
+      const animationKey = this.adultAnimationForState(state);
+      if (animationKey) {
+        this.sprite.play(animationKey, true);
+        this.shadow?.setScale(state === PetState.Walking ? 1.04 : 1, 1);
+        return;
+      }
+      this.sprite.stop();
+      this.sprite.setTexture(this.adultTextureForState(state));
+      return;
+    }
     const animationKey = this.animationForState(state);
     if (animationKey) {
       this.sprite.play(animationKey, true);
@@ -232,12 +244,44 @@ export class Pet extends Phaser.GameObjects.Container {
     }
   }
 
+  private adultAnimationForState(state: PetState): string | undefined {
+    switch (state) {
+      case PetState.Walking:
+      case PetState.Exercising:
+        return getAdultWalkAnimationKey(this.adultFormId());
+      case PetState.Playing:
+      case PetState.Happy:
+      case PetState.Question:
+        return getAdultClickAnimationKey(this.adultFormId());
+      default:
+        return undefined;
+    }
+  }
+
   private textureForState(state: PetState): string {
     switch (state) {
       case PetState.Sad:
         return MushroomFrames.relax[3];
       default:
         return MushroomFrames.idle[0];
+    }
+  }
+
+  private adultTextureForState(state: PetState): string {
+    const formId = this.adultFormId();
+    switch (state) {
+      case PetState.Sleeping:
+        return getAdultPoseKey(formId, "sleep");
+      case PetState.Reading:
+      case PetState.Resting:
+      case PetState.Sad:
+        return getAdultPoseKey(formId, "sit");
+      case PetState.Crafting:
+      case PetState.Eating:
+      case PetState.Thinking:
+        return getAdultPoseKey(formId, "play");
+      default:
+        return getAdultIdleKey(formId);
     }
   }
 
@@ -256,7 +300,7 @@ export class Pet extends Phaser.GameObjects.Container {
     this.stopPoseTweens();
     this.sprite.stop();
     this.resetSpriteTransform();
-    this.sprite.play(MushroomAnimationKeys.React, true);
+    this.sprite.play(this.isAdult() ? getAdultClickAnimationKey(this.adultFormId()) : MushroomAnimationKeys.React, true);
     if (this.isAdult()) this.emitSparkles();
     this.scene.tweens.add({
       targets: this.sprite,
@@ -361,8 +405,12 @@ export class Pet extends Phaser.GameObjects.Container {
       case FurnitureType.Toy:
         return PetState.Playing;
       case FurnitureType.Pot:
+      case FurnitureType.Painting:
         return PetState.Thinking;
       case FurnitureType.Sofa:
+      case FurnitureType.Rug:
+      case FurnitureType.CoffeeTable:
+      case FurnitureType.TvCabinet:
         return PetState.Resting;
       default:
         return PetState.Idle;
@@ -373,20 +421,25 @@ export class Pet extends Phaser.GameObjects.Container {
     switch (type) {
       case FurnitureType.Bed:
       case FurnitureType.Sofa:
+      case FurnitureType.Rug:
         return { mood: 3, energy: 8, intimacy: 1, feedback: "休息了一会儿" };
       case FurnitureType.FoodBowl:
         return { mood: 3, energy: 5, intimacy: 2, feedback: "吃得很满足" };
       case FurnitureType.Toy:
         return { mood: 7, energy: -4, intimacy: 3, feedback: "玩得很开心" };
       case FurnitureType.ExerciseEquipment:
-        return { mood: 4, energy: -8, intimacy: 3, feedback: "活动了身体" };
+        return { mood: 4, energy: -8, intimacy: 3, feedback: "活动了一下身体" };
       case FurnitureType.Chair:
       case FurnitureType.Bookshelf:
         return { mood: 3, energy: -2, intimacy: 4, feedback: "安静读了一会儿" };
       case FurnitureType.Desk:
+      case FurnitureType.CoffeeTable:
         return { mood: 4, energy: -3, intimacy: 4, feedback: "做了点小东西" };
       case FurnitureType.Pot:
+      case FurnitureType.Painting:
         return { mood: 2, energy: -1, intimacy: 3, feedback: "想起了最初的种子" };
+      case FurnitureType.TvCabinet:
+        return { mood: 4, energy: -1, intimacy: 2, feedback: "放松看了一会儿" };
       default:
         return { mood: 2, energy: -2, intimacy: 2, feedback: "记住了这次互动" };
     }
@@ -407,6 +460,10 @@ export class Pet extends Phaser.GameObjects.Container {
       default:
         return new Phaser.Math.Vector2(0, 0);
     }
+  }
+
+  private adultFormId(): string | undefined {
+    return this.fullSave.adultForm?.formId ?? this.fullSave.pet.adultFormId;
   }
 
   private isAdult(): boolean {

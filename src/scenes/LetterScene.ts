@@ -5,6 +5,7 @@ import { AnimalIslandTheme } from "../ui/AnimalIslandTheme";
 import { UIButton } from "../ui/UIButton";
 import { UIPanel } from "../ui/UIPanel";
 import { TextModal } from "../ui/TextModal";
+import { AssetKeys } from "../utils/AssetKeys";
 
 export class LetterScene extends Phaser.Scene {
   private domElement?: Phaser.GameObjects.DOMElement;
@@ -20,6 +21,7 @@ export class LetterScene extends Phaser.Scene {
       return;
     }
     AnimalIslandTheme.sceneBackground(this);
+    this.add.image(640, 360, AssetKeys.UI.LetterEnvelope).setDisplaySize(420, 560).setAlpha(0.18);
     new UIPanel(this, 640, 360, 780, 560, "今天想对它说些什么？");
     const existing = LetterSystem.getTodayLetter(save);
     if (existing) {

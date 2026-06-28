@@ -9,11 +9,19 @@ function readText(relativePath) {
   return fs.readFileSync(path.join(root, relativePath), "utf8");
 }
 
+function fileExists(relativePath) {
+  return fs.existsSync(path.join(root, relativePath));
+}
+
 function expect(condition, message) {
   if (!condition) failures.push(message);
 }
 
-function parsePng(relativePath) {
+function parsePng(relativePath, requireAlpha = true) {
+  expect(fileExists(relativePath), `${relativePath} should exist`);
+  if (!fileExists(relativePath)) {
+    return { width: 1, height: 1, pixels: Buffer.from([0, 0, 0, 0]) };
+  }
   const bytes = fs.readFileSync(path.join(root, relativePath));
   expect(bytes.slice(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])), `${relativePath} is not a PNG`);
   let offset = 8;
@@ -40,7 +48,12 @@ function parsePng(relativePath) {
     offset = dataEnd + 4;
   }
 
-  expect(bitDepth === 8 && colorType === 6, `${relativePath} must be 8-bit RGBA PNG for alpha verification`);
+  if (requireAlpha) {
+    expect(bitDepth === 8 && colorType === 6, `${relativePath} must be 8-bit RGBA PNG for alpha verification`);
+  }
+  if (bitDepth !== 8 || colorType !== 6) {
+    return { width, height, pixels: Buffer.alloc(Math.max(1, width * height * 4)) };
+  }
   const raw = zlib.inflateSync(Buffer.concat(idat));
   const channels = 4;
   const stride = width * channels;
@@ -92,7 +105,22 @@ const furnitureDatabase = readText("src/data/furnitureDatabase.ts");
 const defaultSave = readText("src/data/defaultSave.ts");
 const saveSystem = readText("src/systems/SaveSystem.ts");
 const roomArrange = readText("src/scenes/RoomArrangeScene.ts");
+const packageJson = readText("package.json");
+const indexHtml = readText("index.html");
 
+expect(packageJson.includes('"name": "petpet"'), "package.json should use the petpet project name");
+expect(packageJson.includes("vite build --base=/petpet/"), "Production build should use the /petpet/ GitHub Pages base");
+expect(indexHtml.includes("<title>petpet</title>"), "index.html title should be petpet");
+expect(assetKeys.includes("StartHero"), "AssetKeys should include the cleaned start screen hero");
+expect(assetKeys.includes("HomeBackground"), "AssetKeys should include the new home background");
+expect(assetKeys.includes("getFurnitureTextureKey(type: FurnitureType, rotation"), "Furniture texture lookup should account for rotation");
+expect(roomLayout.includes("blocksPlacement"), "Furniture placement definitions should mark non-blocking decor such as rugs and paintings");
+for (const typeName of ["Rug", "Painting", "CoffeeTable", "TvCabinet"]) {
+  expect(assetKeys.includes(`Furniture.${typeName}`), `AssetKeys should expose Furniture.${typeName}`);
+}
+for (const typeName of ["Rug", "Painting", "CoffeeTable", "TvCabinet"]) {
+  expect(roomLayout.includes(`FurnitureType.${typeName}`), `Room layout should support FurnitureType.${typeName}`);
+}
 expect(assetKeys.includes("MushroomFrames"), "AssetKeys should expose complete mushroom frame groups");
 expect(assetKeys.includes("MushroomAnimationKeys"), "AssetKeys should expose mushroom animation keys");
 for (const anim of ["Idle", "Walk", "React", "Relax", "Sleep", "Craft"]) {
@@ -105,7 +133,7 @@ expect(preload.includes("MUSHROOM_ANIMATION_FRAME_RATES"), "PreloadScene should 
 expect(pet.includes("faceTarget(next.x)") && pet.includes("targetX < this.x"), "Pet should mirror left-facing movement for every growth stage");
 expect(!clothingDatabase.includes("tail_bow"), "Clothing database should not include tail accessories");
 expect(!/const slots = \[[\s\S]*TailAccessory[\s\S]*\];/.test(wardrobe), "Wardrobe slot rows should not include tail accessories");
-for (const oldDefault of ["bookshelf_1", "exercise_1", "food_1", "toy_1"]) {
+for (const oldDefault of ["exercise_1", "food_1", "toy_1"]) {
   expect(!new RegExp(`id:\\s*"${oldDefault}"`).test(roomLayout), `Default room should not place old unsupported furniture ${oldDefault}`);
 }
 expect(furnitureDatabase.includes("defaultStoredFurnitureItems"), "Furniture database should expose default stored furniture for the arrange inventory");
@@ -114,7 +142,32 @@ expect(roomLayout.includes("source.isPlaced ?? defaultItem.isPlaced"), "Furnitur
 expect(saveSystem.includes("isDefaultPlacedFurnitureLayout"), "Save migration should move the old untouched default room into storage");
 expect(roomArrange.includes("placeStoredFurnitureInFirstAvailableCell"), "Arrange inventory should let players select stored furniture into the room");
 
-for (const file of ["bed.png", "chair.png", "desk.png", "sofa.png", "wardrobe.png", "decoration.png"]) {
+for (const file of [
+  "bed.png",
+  "bed_left.png",
+  "bed_right.png",
+  "chair_left.png",
+  "chair_right.png",
+  "desk.png",
+  "desk_left.png",
+  "desk_right.png",
+  "sofa.png",
+  "sofa_left.png",
+  "sofa_right.png",
+  "wardrobe.png",
+  "wardrobe_left.png",
+  "wardrobe_right.png",
+  "rug.png",
+  "painting.png",
+  "bookshelf_left.png",
+  "bookshelf_right.png",
+  "treadmill_left.png",
+  "treadmill_right.png",
+  "tv_cabinet_left.png",
+  "tv_cabinet_right.png",
+  "plant.png",
+  "coffee_table.png"
+]) {
   const png = parsePng(`public/assets/furniture/${file}`);
   const cornerAlpha = [
     alphaAt(png, 0, 0),
@@ -123,6 +176,23 @@ for (const file of ["bed.png", "chair.png", "desk.png", "sofa.png", "wardrobe.pn
     alphaAt(png, png.width - 1, png.height - 1)
   ];
   expect(cornerAlpha.every((alpha) => alpha <= 8), `${file} should have transparent corners after background removal`);
+}
+
+for (const file of ["home_background.png", "home_title.png", "home_hero.png", "start_button_petpet.png", "settings_button_petpet.png"]) {
+  const png = parsePng(`public/assets/start/${file}`, false);
+  expect(png.width > 1 && png.height > 1, `${file} should be a valid start screen asset`);
+}
+
+for (const group of ["idle", "walk", "react", "relax", "sleep", "craft"]) {
+  const expected = group === "sleep" ? 7 : group === "walk" ? 6 : 4;
+  for (let index = 0; index < expected; index += 1) {
+    expect(fileExists(`public/assets/pet/mushroom/${group}_${index}.png`), `mushroom ${group}_${index}.png should exist`);
+  }
+}
+
+for (const file of ["idle_0.png", "click_0.png", "click_1.png", "sleep_0.png", "walk_0.png", "walk_1.png", "walk_2.png", "walk_3.png", "walk_4.png", "walk_5.png", "walk_6.png"]) {
+  const png = parsePng(`public/assets/pet/adult/ian/${file}`);
+  expect(alphaAt(png, 0, 0) <= 8, `Ian ${file} should have transparent corners`);
 }
 
 if (failures.length > 0) {

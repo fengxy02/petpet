@@ -2,8 +2,8 @@ import Phaser from "phaser";
 import {
   applyFurnitureCell,
   canPlaceFurnitureAtCell,
-  furniturePlacementDefinitions,
   findFirstAvailableCell,
+  furniturePlacementDefinitions,
   getFixedStructureBlockedCellIds,
   getGridCell,
   getNearestGridCell,
@@ -12,6 +12,7 @@ import {
   rotateFurniture,
   type FurnitureGridCell
 } from "../data/roomLayout";
+import { furnitureLabels } from "../data/furnitureDatabase";
 import { FurnitureSaveData, SaveData } from "../data/types";
 import { Furniture } from "../entities/Furniture";
 import { Pot } from "../entities/Pot";
@@ -19,8 +20,7 @@ import { Room } from "../entities/Room";
 import { SaveSystem } from "../systems/SaveSystem";
 import { AnimalIslandTheme } from "../ui/AnimalIslandTheme";
 import { UIButton } from "../ui/UIButton";
-import { furnitureLabels } from "../data/furnitureDatabase";
-import { getFurnitureRotationRadians, getFurnitureTextureKey } from "../utils/AssetKeys";
+import { getFurnitureTextureKey } from "../utils/AssetKeys";
 
 type DragOrigin = {
   x: number;
@@ -65,11 +65,11 @@ export class RoomArrangeScene extends Phaser.Scene {
     const top = this.add.graphics().setDepth(940);
     AnimalIslandTheme.drawTopStrip(top, 1280, 82);
     this.add.text(42, 26, "家具布置", AnimalIslandTheme.textStyle(28, AnimalIslandTheme.colors.text, { fontStyle: "bold" })).setDepth(941);
-    new UIButton(this, 300, 44, "我要重新布置", () => this.recycleAllFurniture(), 226, 52, { variant: "default", fontSize: 18 }).setDepth(950);
-    new UIButton(this, 1090, 44, "我整理好了", () => this.finishArrangement(), 200, 52, { variant: "primary", fontSize: 18 }).setDepth(950);
+    new UIButton(this, 300, 44, "全部收回", () => this.recycleAllFurniture(), 226, 52, { variant: "default", fontSize: 18 }).setDepth(950);
+    new UIButton(this, 1090, 44, "布置好了", () => this.finishArrangement(), 200, 52, { variant: "primary", fontSize: 18 }).setDepth(950);
     const bottom = this.add.graphics().setDepth(940);
     AnimalIslandTheme.drawCard(bottom, 18, 618, 1244, 88, { fill: AnimalIslandTheme.colors.cream, border: AnimalIslandTheme.colors.borderLight, radius: 24, alpha: 0.94 });
-    this.add.text(42, 638, "待摆区", AnimalIslandTheme.textStyle(22, AnimalIslandTheme.colors.text, { fontStyle: "bold" })).setDepth(941);
+    this.add.text(42, 638, "待摆放", AnimalIslandTheme.textStyle(22, AnimalIslandTheme.colors.text, { fontStyle: "bold" })).setDepth(941);
   }
 
   private drawGrid(): void {
@@ -157,16 +157,16 @@ export class RoomArrangeScene extends Phaser.Scene {
     const draft = this.requireDraft();
     const unplaced = draft.room.furnitureItems.filter((item) => item.isPlaced === false);
     unplaced.forEach((item, index) => {
-      const x = 145 + index * 104;
+      const x = 134 + index * 94;
       const y = 678;
       let wasDragged = false;
       const container = this.add.container(x, y).setDepth(960);
       const bg = this.add.graphics();
-      AnimalIslandTheme.drawCard(bg, -42, -38, 84, 76, { fill: AnimalIslandTheme.colors.creamSoft, border: AnimalIslandTheme.colors.borderLight, radius: 16 });
-      const sprite = this.add.sprite(0, -6, getFurnitureTextureKey(item.type)).setScale(0.46).setRotation(getFurnitureRotationRadians(item.rotation));
-      const label = this.add.text(0, 25, furnitureLabels[item.type], AnimalIslandTheme.textStyle(13, AnimalIslandTheme.colors.text, { fontStyle: "bold" })).setOrigin(0.5);
+      AnimalIslandTheme.drawCard(bg, -38, -38, 76, 76, { fill: AnimalIslandTheme.colors.creamSoft, border: AnimalIslandTheme.colors.borderLight, radius: 14 });
+      const sprite = this.add.sprite(0, -8, getFurnitureTextureKey(item.type, item.rotation)).setScale(0.42);
+      const label = this.add.text(0, 25, furnitureLabels[item.type], AnimalIslandTheme.textStyle(12, AnimalIslandTheme.colors.text, { fontStyle: "bold" })).setOrigin(0.5);
       container.add([bg, sprite, label]);
-      container.setSize(84, 76).setInteractive({ useHandCursor: true });
+      container.setSize(76, 76).setInteractive({ useHandCursor: true });
       this.input.setDraggable(container);
       container.on("pointerup", () => {
         if (wasDragged) return;
@@ -219,9 +219,9 @@ export class RoomArrangeScene extends Phaser.Scene {
   private selectFurniture(furniture: Furniture): void {
     this.selectedFurniture = furniture;
     this.clearSelectionControls();
-    const recycle = new UIButton(this, 0, 0, "回收", () => this.recycleSelectedFurniture(), 82, 42, { variant: "danger", fontSize: 15 }).setDepth(970);
-    const rotateLeft = new UIButton(this, 0, 0, "左旋", () => this.rotateSelectedFurniture(-1), 82, 42, { variant: "default", fontSize: 15 }).setDepth(970);
-    const rotateRight = new UIButton(this, 0, 0, "右旋", () => this.rotateSelectedFurniture(1), 82, 42, { variant: "default", fontSize: 15 }).setDepth(970);
+    const recycle = new UIButton(this, 0, 0, "收回", () => this.recycleSelectedFurniture(), 82, 42, { variant: "danger", fontSize: 15 }).setDepth(970);
+    const rotateLeft = new UIButton(this, 0, 0, "向左", () => this.rotateSelectedFurniture(-1), 82, 42, { variant: "default", fontSize: 15 }).setDepth(970);
+    const rotateRight = new UIButton(this, 0, 0, "向右", () => this.rotateSelectedFurniture(1), 82, 42, { variant: "default", fontSize: 15 }).setDepth(970);
     this.selectionControls.push(recycle, rotateLeft, rotateRight);
     this.positionSelectionControls(furniture);
   }

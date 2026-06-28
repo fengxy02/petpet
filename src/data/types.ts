@@ -33,7 +33,11 @@ export enum FurnitureType {
   Sofa = "Sofa",
   Bookshelf = "Bookshelf",
   Wardrobe = "Wardrobe",
-  Decoration = "Decoration"
+  Decoration = "Decoration",
+  Rug = "Rug",
+  Painting = "Painting",
+  CoffeeTable = "CoffeeTable",
+  TvCabinet = "TvCabinet"
 }
 
 export enum ClothingSlot {

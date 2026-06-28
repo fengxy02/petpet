@@ -5,7 +5,7 @@ import { WardrobeSystem } from "../systems/WardrobeSystem";
 import { AnimalIslandTheme } from "../ui/AnimalIslandTheme";
 import { UIButton } from "../ui/UIButton";
 import { UIPanel } from "../ui/UIPanel";
-import { getAdultIdleKey } from "../utils/AssetKeys";
+import { AssetKeys, getAdultIdleKey } from "../utils/AssetKeys";
 
 const slots = [ClothingSlot.Hat, ClothingSlot.HeadAccessory, ClothingSlot.NeckAccessory, ClothingSlot.BodyAccessory] as const;
 
@@ -35,6 +35,7 @@ export class WardrobeScene extends Phaser.Scene {
     AnimalIslandTheme.drawCard(previewBg, 255, 235, 250, 300, { fill: AnimalIslandTheme.colors.creamSoft, border: AnimalIslandTheme.colors.borderLight, radius: 26, alpha: 0.78 });
     this.add.sprite(380, 505, getAdultIdleKey(save.adultForm?.formId)).setOrigin(0.5, 1).setScale(1.05);
     this.drawEquippedPreview(save);
+    this.drawPetpetReferencePreview();
     slots.forEach((slot, slotIndex) => {
       const rowY = 150 + slotIndex * 88;
       const rowBg = this.add.graphics();
@@ -43,15 +44,37 @@ export class WardrobeScene extends Phaser.Scene {
       const items = WardrobeSystem.getItemsBySlot(save, slot);
       items.forEach((item, itemIndex) => {
         const equipped = save.equippedClothingBySlot[slot] === item.id;
-        new UIButton(this, 775 + itemIndex * 168, 178 + slotIndex * 88, equipped ? `${item.name} ✓` : item.name, () => {
-          if (equipped) WardrobeSystem.unequip(save, slot);
-          else WardrobeSystem.equip(save, item.id);
-          SaveSystem.saveGame(save);
-          this.scene.restart();
-        }, 154, 48, { variant: equipped ? "primary" : "default", fontSize: 16 });
+        new UIButton(
+          this,
+          775 + itemIndex * 168,
+          178 + slotIndex * 88,
+          equipped ? `${item.name} ✓` : item.name,
+          () => {
+            if (equipped) WardrobeSystem.unequip(save, slot);
+            else WardrobeSystem.equip(save, item.id);
+            SaveSystem.saveGame(save);
+            this.scene.restart();
+          },
+          154,
+          48,
+          { variant: equipped ? "primary" : "default", fontSize: 16 }
+        );
       });
     });
     new UIButton(this, 640, 635, "回到小屋", () => this.scene.start("MainRoomScene"), 220, 58, { variant: "primary" });
+  }
+
+  private drawPetpetReferencePreview(): void {
+    const keys = [
+      [AssetKeys.ClothingPreview.PersonFront, AssetKeys.ClothingPreview.HatFront],
+      [AssetKeys.ClothingPreview.PersonSide, AssetKeys.ClothingPreview.HatSide],
+      [AssetKeys.ClothingPreview.PersonBack, AssetKeys.ClothingPreview.HatBack]
+    ];
+    keys.forEach(([personKey, hatKey], index) => {
+      const x = 295 + index * 85;
+      this.add.sprite(x, 598, personKey).setOrigin(0.5, 1).setScale(0.28);
+      this.add.sprite(x, 598, hatKey).setOrigin(0.5, 1).setScale(0.28);
+    });
   }
 
   private drawEquippedPreview(save: NonNullable<ReturnType<typeof SaveSystem.loadSave>>): void {

@@ -1,54 +1,32 @@
-# 春芽来信
+# petpet
 
-一个纯前端 Web 版 2.5D 温馨虚拟宠物养成游戏 MVP。
+一个纯前端 Web 版虚拟宠物养成游戏，使用 Vite、TypeScript 和 Phaser 3 构建。
 
-## 运行方式
+## 运行
 
 ```bash
 npm install
 npm run dev
 ```
 
-然后在浏览器打开 Vite 输出的本地地址，通常是 `http://localhost:5173`。
+本地开发地址通常是 `http://localhost:5173`。线上 GitHub Pages 固定地址计划为：
 
-## 技术栈
-
-- Vite
-- TypeScript
-- Phaser 3
-- localStorage
-
-存档 key：`spring_bud_letter_save_v1`
-
-## 当前 MVP 流程
-
-封面界面 -> 种子仪式 -> Day 1 到 Day 6 陪伴成长 -> Day 7 先阅读昨日小结 -> 成年体生成 -> 成年体换装、收藏、布置、日常互动。
-
-跨天登录时每天只推进一个成长日，并在回到小屋时提示玩家，不会一次性跳过多天陪伴内容。成年体会根据写信关键词、每日问答、家具互动和收藏偏好生成不同形态。
-
-开发模式下主房间右下角有 `Debug 下一天`，用于快速测试 Day 1 到 Day 7。
-
-## 素材替换
-
-把 PNG 放到 `public/assets/` 下的对应路径即可，例如：
-
-- `public/assets/start/cover_background.png`
-- `public/assets/growth/pot_soil.png`
-- `public/assets/pet/baby/idle_0.png`
-- `public/assets/pet/adult/healing_companion/idle_0.png`
-- `public/assets/furniture/bed.png`
-- `public/assets/ui/button.png`
-
-如果图片不存在，游戏会通过 `src/utils/PlaceholderFactory.ts` 自动生成占位 Texture，不会因为缺素材中断流程。
-
-## 可选日志总结 API
-
-`.env` 已预留：
-
-```env
-VITE_SUMMARY_API_URL=
-VITE_SUMMARY_API_KEY=
-VITE_ENABLE_AI_SUMMARY=false
+```text
+https://fengxy02.github.io/petpet/
 ```
 
-默认关闭 API，使用本地关键词规则生成第二天日志反馈。开启 API 后如果请求失败，也会回退本地规则，并把生成结果保存到 localStorage，避免刷新重复请求。
+## 发布
+
+构建命令已经使用 GitHub Pages 子路径：
+
+```bash
+npm run build
+```
+
+仓库改名为 `petpet` 后，GitHub Actions 会把 `dist` 发布到 Pages。
+
+## 素材
+
+本轮已把首页、房间、蘑菇宠物、Ian 成年体、家具、换装预览和信件背景素材接入到 `public/assets/`。房间初始不摆放家具，家具默认放在装饰库存里，玩家选择后才出现场景中。
+
+存档 key：`spring_bud_letter_save_v1`

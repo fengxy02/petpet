@@ -2,13 +2,13 @@ import Phaser from "phaser";
 import { AnimalIslandTheme } from "../ui/AnimalIslandTheme";
 import {
   AssetManifest,
-  MushroomAnimationKeys,
-  MushroomFrames,
   adultAnimationFormIds,
   getAdultClickAnimationKey,
   getAdultClickFrameKeys,
   getAdultWalkAnimationKey,
-  getAdultWalkFrameKeys
+  getAdultWalkFrameKeys,
+  MushroomAnimationKeys,
+  MushroomFrames
 } from "../utils/AssetKeys";
 import { PlaceholderFactory } from "../utils/PlaceholderFactory";
 
@@ -28,7 +28,7 @@ export class PreloadScene extends Phaser.Scene {
 
   preload(): void {
     AnimalIslandTheme.sceneBackground(this);
-    this.add.text(640, 330, "正在整理春芽的小屋...", {
+    this.add.text(640, 330, "正在整理 petpet 的小屋...", {
       ...AnimalIslandTheme.textStyle(28, AnimalIslandTheme.colors.text, { fontStyle: "bold" })
     }).setOrigin(0.5);
     this.load.on("loaderror", () => undefined);

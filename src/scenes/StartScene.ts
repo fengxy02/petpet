@@ -8,11 +8,12 @@ const START_BUTTON_X = 340;
 const START_BUTTON_Y = 470;
 const SETTINGS_BUTTON_Y = 580;
 const HOME_BUTTON_WIDTH = 360;
-const LOGO_X = 320;
-const LOGO_Y = 195;
-const LOGO_WIDTH = 460;
-const HERO_X = 910;
-const HERO_Y = 600;
+const TITLE_X = 350;
+const TITLE_Y = 175;
+const TITLE_WIDTH = 520;
+const HERO_X = 925;
+const HERO_Y = 665;
+const HERO_HEIGHT = 530;
 const CLICK_DELAY_MS = 100;
 
 export class StartScene extends Phaser.Scene {
@@ -21,8 +22,8 @@ export class StartScene extends Phaser.Scene {
   }
 
   create(): void {
-    this.add.image(640, 360, AssetKeys.Start.CoverBackground);
-    this.createMushroomHero();
+    this.add.image(640, 360, AssetKeys.Start.HomeBackground).setDisplaySize(1280, 720);
+    this.createStartHero();
     this.createWobblingLogo();
     this.createHomeImageButton(START_BUTTON_X, START_BUTTON_Y, AssetKeys.Start.StartButton, () => this.startGame());
     this.createHomeImageButton(START_BUTTON_X, SETTINGS_BUTTON_Y, AssetKeys.Start.SettingsButton, () => this.scene.start("SettingsScene", { returnScene: "StartScene" }));
@@ -42,11 +43,11 @@ export class StartScene extends Phaser.Scene {
   }
 
   private createWobblingLogo(): void {
-    const logo = this.add.image(LOGO_X, LOGO_Y, AssetKeys.Start.GameLogo).setOrigin(0.5);
-    logo.setDisplaySize(LOGO_WIDTH, LOGO_WIDTH * (logo.height / logo.width));
+    const logo = this.add.image(TITLE_X, TITLE_Y, AssetKeys.Start.HomeTitle).setOrigin(0.5);
+    logo.setDisplaySize(TITLE_WIDTH, TITLE_WIDTH * (logo.height / logo.width));
     this.tweens.add({
       targets: logo,
-      x: LOGO_X + 10,
+      x: TITLE_X + 10,
       angle: 2,
       duration: 1200,
       ease: "Sine.easeInOut",
@@ -55,13 +56,14 @@ export class StartScene extends Phaser.Scene {
     });
   }
 
-  private createMushroomHero(): void {
-    const shadow = this.add.ellipse(HERO_X, HERO_Y - 10, 150, 28, 0x5d4b3c, 0.16).setOrigin(0.5);
-    const hero = this.add.image(HERO_X, HERO_Y, AssetKeys.Pet.BabyIdle0).setOrigin(0.5, 1);
+  private createStartHero(): void {
+    const shadow = this.add.ellipse(HERO_X, HERO_Y - 10, 220, 32, 0x5d4b3c, 0.14).setOrigin(0.5);
+    const hero = this.add.image(HERO_X, HERO_Y, AssetKeys.Start.StartHero).setOrigin(0.5, 1);
+    hero.setDisplaySize(HERO_HEIGHT * (hero.width / hero.height), HERO_HEIGHT);
     this.tweens.add({
       targets: hero,
       y: HERO_Y - 8,
-      angle: 2,
+      angle: 1.5,
       duration: 1500,
       ease: "Sine.easeInOut",
       yoyo: true,
@@ -69,7 +71,7 @@ export class StartScene extends Phaser.Scene {
     });
     this.tweens.add({
       targets: shadow,
-      scaleX: 0.92,
+      scaleX: 0.94,
       alpha: 0.1,
       duration: 1500,
       ease: "Sine.easeInOut",

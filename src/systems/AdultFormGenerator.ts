@@ -44,9 +44,14 @@ export class AdultFormGenerator {
     }
     for (const record of save.interactionRecords) {
       if (record.furnitureType === FurnitureType.Chair || record.furnitureType === FurnitureType.Bookshelf) scores.read += 1;
-      if (record.furnitureType === FurnitureType.ExerciseEquipment) scores.exercise += 1;
-      if (record.furnitureType === FurnitureType.Desk) scores.craft += 1;
-      if (record.furnitureType === FurnitureType.Bed || record.furnitureType === FurnitureType.Sofa) scores.sleep += 1;
+      if (record.furnitureType === FurnitureType.ExerciseEquipment) {
+        scores.exercise += 1;
+        scores.active += 1;
+      }
+      if (record.furnitureType === FurnitureType.Desk || record.furnitureType === FurnitureType.CoffeeTable) scores.craft += 1;
+      if (record.furnitureType === FurnitureType.Bed || record.furnitureType === FurnitureType.Sofa || record.furnitureType === FurnitureType.Rug) scores.sleep += 1;
+      if (record.furnitureType === FurnitureType.TvCabinet) scores.rest += 1;
+      if (record.furnitureType === FurnitureType.Painting || record.furnitureType === FurnitureType.Pot) scores.quiet += 1;
     }
     for (const item of save.collections) {
       if (item.type === "postcard") scores.travel += 2;
@@ -96,7 +101,7 @@ export class AdultFormGenerator {
 }
 
 const tagLabels: Record<string, string> = {
-  read: "安静读写",
+  read: "安静阅读",
   exercise: "运动活力",
   comfort: "被安慰的时刻",
   craft: "手作礼物",

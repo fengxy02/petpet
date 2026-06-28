@@ -54,6 +54,7 @@ export type FurniturePlacementDefinition = {
   };
   surfaces: FurnitureSurface[];
   defaultScale: number;
+  blocksPlacement: boolean;
 };
 
 export type PotPlacement = {
@@ -127,22 +128,41 @@ export const DEFAULT_ROOM_SURFACE_THEME: RoomSurfaceTheme = {
 };
 
 export const furniturePlacementDefinitions: Record<FurnitureType, FurniturePlacementDefinition> = {
-  [FurnitureType.Bed]: { type: FurnitureType.Bed, footprint: { cols: 3, rows: 2 }, surfaces: ["floor"], defaultScale: 1.08 },
-  [FurnitureType.Chair]: { type: FurnitureType.Chair, footprint: { cols: 1, rows: 1 }, surfaces: ["floor"], defaultScale: 1.06 },
-  [FurnitureType.Desk]: { type: FurnitureType.Desk, footprint: { cols: 3, rows: 2 }, surfaces: ["floor"], defaultScale: 1.06 },
-  [FurnitureType.ExerciseEquipment]: { type: FurnitureType.ExerciseEquipment, footprint: { cols: 2, rows: 2 }, surfaces: ["floor"], defaultScale: 1 },
-  [FurnitureType.FoodBowl]: { type: FurnitureType.FoodBowl, footprint: { cols: 1, rows: 1 }, surfaces: ["floor"], defaultScale: 1 },
-  [FurnitureType.Toy]: { type: FurnitureType.Toy, footprint: { cols: 1, rows: 1 }, surfaces: ["floor"], defaultScale: 1 },
-  [FurnitureType.Pot]: { type: FurnitureType.Pot, footprint: { cols: 1, rows: 1 }, surfaces: ["floor"], defaultScale: 0.72 },
-  [FurnitureType.Sofa]: { type: FurnitureType.Sofa, footprint: { cols: 3, rows: 2 }, surfaces: ["floor"], defaultScale: 1.06 },
-  [FurnitureType.Bookshelf]: { type: FurnitureType.Bookshelf, footprint: { cols: 2, rows: 2 }, surfaces: ["floor"], defaultScale: 1 },
-  [FurnitureType.Wardrobe]: { type: FurnitureType.Wardrobe, footprint: { cols: 2, rows: 2 }, surfaces: ["floor"], defaultScale: 1.04 },
-  [FurnitureType.Decoration]: { type: FurnitureType.Decoration, footprint: { cols: 2, rows: 2 }, surfaces: ["wall"], defaultScale: 0.9 }
+  [FurnitureType.Bed]: { type: FurnitureType.Bed, footprint: { cols: 3, rows: 2 }, surfaces: ["floor"], defaultScale: 1.08, blocksPlacement: true },
+  [FurnitureType.Chair]: { type: FurnitureType.Chair, footprint: { cols: 1, rows: 1 }, surfaces: ["floor"], defaultScale: 1.06, blocksPlacement: true },
+  [FurnitureType.Desk]: { type: FurnitureType.Desk, footprint: { cols: 3, rows: 2 }, surfaces: ["floor"], defaultScale: 1.06, blocksPlacement: true },
+  [FurnitureType.ExerciseEquipment]: { type: FurnitureType.ExerciseEquipment, footprint: { cols: 2, rows: 2 }, surfaces: ["floor"], defaultScale: 1, blocksPlacement: true },
+  [FurnitureType.FoodBowl]: { type: FurnitureType.FoodBowl, footprint: { cols: 1, rows: 1 }, surfaces: ["floor"], defaultScale: 1, blocksPlacement: true },
+  [FurnitureType.Toy]: { type: FurnitureType.Toy, footprint: { cols: 1, rows: 1 }, surfaces: ["floor"], defaultScale: 1, blocksPlacement: true },
+  [FurnitureType.Pot]: { type: FurnitureType.Pot, footprint: { cols: 1, rows: 1 }, surfaces: ["floor"], defaultScale: 0.72, blocksPlacement: true },
+  [FurnitureType.Sofa]: { type: FurnitureType.Sofa, footprint: { cols: 3, rows: 2 }, surfaces: ["floor"], defaultScale: 1.06, blocksPlacement: true },
+  [FurnitureType.Bookshelf]: { type: FurnitureType.Bookshelf, footprint: { cols: 2, rows: 2 }, surfaces: ["floor"], defaultScale: 1, blocksPlacement: true },
+  [FurnitureType.Wardrobe]: { type: FurnitureType.Wardrobe, footprint: { cols: 2, rows: 2 }, surfaces: ["floor"], defaultScale: 1.04, blocksPlacement: true },
+  [FurnitureType.Decoration]: { type: FurnitureType.Decoration, footprint: { cols: 2, rows: 2 }, surfaces: ["wall"], defaultScale: 0.9, blocksPlacement: false },
+  [FurnitureType.Rug]: { type: FurnitureType.Rug, footprint: { cols: 3, rows: 2 }, surfaces: ["floor"], defaultScale: 1, blocksPlacement: false },
+  [FurnitureType.Painting]: { type: FurnitureType.Painting, footprint: { cols: 2, rows: 1 }, surfaces: ["wall"], defaultScale: 0.9, blocksPlacement: false },
+  [FurnitureType.CoffeeTable]: { type: FurnitureType.CoffeeTable, footprint: { cols: 2, rows: 1 }, surfaces: ["floor"], defaultScale: 1, blocksPlacement: true },
+  [FurnitureType.TvCabinet]: { type: FurnitureType.TvCabinet, footprint: { cols: 2, rows: 2 }, surfaces: ["floor"], defaultScale: 1, blocksPlacement: true }
 };
 
 export const roomGridCells: FurnitureGridCell[] = createRoomGridCells();
 
 const defaultFurniturePlacements: Array<{ id: string; type: FurnitureType; cell: string; rotation?: number; interactable?: boolean }> = [
+  { id: "bed_1", type: FurnitureType.Bed, cell: "floor-0-1", rotation: -30 },
+  { id: "sofa_1", type: FurnitureType.Sofa, cell: "floor-2-6", rotation: 30 },
+  { id: "desk_1", type: FurnitureType.Desk, cell: "floor-0-6", rotation: 30 },
+  { id: "chair_1", type: FurnitureType.Chair, cell: "floor-2-5", rotation: 30 },
+  { id: "rug_1", type: FurnitureType.Rug, cell: "floor-3-4", interactable: false },
+  { id: "painting_1", type: FurnitureType.Painting, cell: "wall-back-1-1", interactable: false },
+  { id: "bookshelf_1", type: FurnitureType.Bookshelf, cell: "floor-0-2", rotation: -30 },
+  { id: "treadmill_1", type: FurnitureType.ExerciseEquipment, cell: "floor-2-7", rotation: 30 },
+  { id: "tv_cabinet_1", type: FurnitureType.TvCabinet, cell: "floor-1-5", rotation: 30 },
+  { id: "wardrobe_1", type: FurnitureType.Wardrobe, cell: "floor-0-8", rotation: 30 },
+  { id: "plant_1", type: FurnitureType.Pot, cell: "floor-2-2" },
+  { id: "coffee_table_1", type: FurnitureType.CoffeeTable, cell: "floor-3-5" }
+];
+
+const legacyDefaultFurniturePlacements: Array<{ id: string; type: FurnitureType; cell: string; rotation?: number; interactable?: boolean }> = [
   { id: "bed_1", type: FurnitureType.Bed, cell: "floor-0-1" },
   { id: "desk_1", type: FurnitureType.Desk, cell: "floor-0-5" },
   { id: "wardrobe_1", type: FurnitureType.Wardrobe, cell: "floor-0-8" },
@@ -156,6 +176,10 @@ export const singleFloorFurnitureItems: FurnitureSaveData[] = defaultFurniturePl
 );
 
 export const singleFloorStoredFurnitureItems: FurnitureSaveData[] = singleFloorFurnitureItems.map((item) => storeFurnitureItem(item));
+
+const legacySingleFloorFurnitureItems: FurnitureSaveData[] = legacyDefaultFurniturePlacements.map((placement) =>
+  createFurnitureSaveData(placement.id, placement.type, placement.cell, placement.rotation ?? 0, placement.interactable ?? true)
+);
 
 export function createRoomGridCells(): FurnitureGridCell[] {
   const cells: FurnitureGridCell[] = [];
@@ -227,8 +251,12 @@ export function storeFurnitureItem(item: FurnitureSaveData): FurnitureSaveData {
 }
 
 export function isDefaultPlacedFurnitureLayout(items?: Partial<FurnitureSaveData>[]): boolean {
-  if (!items || items.length !== singleFloorFurnitureItems.length) return false;
-  return singleFloorFurnitureItems.every((defaultItem) => {
+  return matchesDefaultPlacedLayout(items, singleFloorFurnitureItems) || matchesDefaultPlacedLayout(items, legacySingleFloorFurnitureItems);
+}
+
+function matchesDefaultPlacedLayout(items: Partial<FurnitureSaveData>[] | undefined, defaults: FurnitureSaveData[]): boolean {
+  if (!items || items.length !== defaults.length) return false;
+  return defaults.every((defaultItem) => {
     const item = items.find((candidate) => candidate.id === defaultItem.id);
     if (!item || item.isPlaced === false) return false;
     return item.type === defaultItem.type && item.gridCellId === defaultItem.gridCellId && normalizeRotation(item.rotation ?? 0) === normalizeRotation(defaultItem.rotation);
@@ -276,6 +304,7 @@ export function getOccupiedGridCellIds(item: Pick<FurnitureSaveData, "gridCellId
   const anchor = getGridCell(item.gridCellId);
   if (!anchor) return [];
   const definition = furniturePlacementDefinitions[item.type];
+  if (!definition.blocksPlacement) return [];
   const prefix = getCellIdPrefix(anchor.id);
   const ids: string[] = [];
   const startCol = anchor.col - Math.floor(definition.footprint.cols / 2);
@@ -297,6 +326,7 @@ export function canPlaceFurnitureAtCell(item: FurnitureSaveData, gridCellId: str
   if (!definition.surfaces.includes(cell.surface)) return false;
   const candidate = { ...item, gridCellId, surface: cell.surface, isPlaced: true };
   const fixedBlockers = new Set(getFixedStructureBlockedCellIds(stage));
+  if (!definition.blocksPlacement) return !fixedBlockers.has(cell.id);
   const occupiedByOthers = new Set(
     items
       .filter((other) => other.id !== item.id && other.isPlaced !== false)
@@ -399,6 +429,38 @@ export function normalizeSingleFloorFurniture(items?: Partial<FurnitureSaveData>
     if (item.isPlaced !== false) applyFurnitureCell(item, item.gridCellId);
     return item;
   });
+  const defaultIds = new Set(singleFloorStoredFurnitureItems.map((item) => item.id));
+  for (const existing of items ?? []) {
+    if (!existing.id || defaultIds.has(existing.id) || !existing.type || !furniturePlacementDefinitions[existing.type]) continue;
+    const definition = furniturePlacementDefinitions[existing.type];
+    const isPlaced = existing.isPlaced ?? true;
+    const fallbackCell = getFirstAvailableCellForType(existing.type);
+    const nearestCell = isPlaced === false
+      ? undefined
+      : existing.gridCellId
+      ? getGridCell(existing.gridCellId)
+      : getNearestGridCell({ x: existing.x ?? fallbackCell.x, y: existing.y ?? fallbackCell.y }, definition.surfaces);
+    const item: FurnitureSaveData = {
+      id: existing.id,
+      type: existing.type,
+      floorId: 1,
+      x: existing.x ?? fallbackCell.x,
+      y: existing.y ?? fallbackCell.y,
+      scale: definition.defaultScale,
+      rotation: normalizeRotation(existing.rotation ?? 0),
+      interactable: existing.interactable ?? true,
+      isPlaced,
+      surface: nearestCell?.surface ?? existing.surface ?? fallbackCell.surface,
+      gridCellId: nearestCell?.id ?? (isPlaced === false ? "" : fallbackCell.id)
+    };
+    if (item.isPlaced === false) {
+      item.x = -1000;
+      item.y = -1000;
+      item.gridCellId = "";
+    }
+    if (item.isPlaced !== false) applyFurnitureCell(item, item.gridCellId);
+    normalized.push(item);
+  }
 
   for (const item of normalized) {
     if (item.isPlaced === false) continue;

@@ -41,7 +41,7 @@ export class Room {
 
   private drawShell(): void {
     this.scene.add.rectangle(640, 360, ROOM_WIDTH, ROOM_HEIGHT, AnimalIslandTheme.colors.cream).setDepth(-170);
-    this.addLayerImage(AssetKeys.Room.CosyBackground, 640, 360, ROOM_WIDTH, ROOM_HEIGHT, -160, 1);
+    this.addLayerImage(AssetKeys.Room.PetpetBackground, 640, 360, ROOM_WIDTH, ROOM_HEIGHT, -160, 1);
   }
 
   private createSurfaceTextures(): void {

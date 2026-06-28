@@ -4,7 +4,7 @@ import { defaultStoredFurnitureItems } from "./furnitureDatabase";
 import { ROOM_LAYOUT, cloneFurnitureItems, getPotPlacementForStage } from "./roomLayout";
 import { GrowthStage, PetState, SaveData } from "./types";
 
-export const SAVE_VERSION = 6;
+export const SAVE_VERSION = 7;
 
 export function createDefaultSave(dateString: string): SaveData {
   const initialPotPlacement = getPotPlacementForStage(GrowthStage.SeedInPot);
