@@ -1,7 +1,12 @@
 node_modules/
 dist/
+release/
 .npm-cache/
 tmp/
 .env
 .DS_Store
 *.log
+asset_contact_sheet.jpg
+filled_assets_preview.jpg
+pet_assets_preview.jpg
+room_furniture_preview_on_cream.jpg

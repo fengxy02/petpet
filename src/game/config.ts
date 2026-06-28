@@ -5,8 +5,10 @@ import { CollectionScene } from "../scenes/CollectionScene";
 import { DailySummaryScene } from "../scenes/DailySummaryScene";
 import { LetterScene } from "../scenes/LetterScene";
 import { MainRoomScene } from "../scenes/MainRoomScene";
+import { OpeningStoryScene } from "../scenes/OpeningStoryScene";
 import { PreloadScene } from "../scenes/PreloadScene";
 import { QuestionScene } from "../scenes/QuestionScene";
+import { RecordBoardScene } from "../scenes/RecordBoardScene";
 import { RoomArrangeScene } from "../scenes/RoomArrangeScene";
 import { SeedRitualScene } from "../scenes/SeedRitualScene";
 import { SettingsScene } from "../scenes/SettingsScene";
@@ -33,6 +35,7 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
     BootScene,
     PreloadScene,
     StartScene,
+    OpeningStoryScene,
     SeedRitualScene,
     MainRoomScene,
     RoomArrangeScene,
@@ -42,6 +45,7 @@ export const gameConfig: Phaser.Types.Core.GameConfig = {
     AdultFormScene,
     WardrobeScene,
     CollectionScene,
+    RecordBoardScene,
     SettingsScene
   ]
 };

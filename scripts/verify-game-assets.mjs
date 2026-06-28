@@ -105,6 +105,8 @@ const furnitureDatabase = readText("src/data/furnitureDatabase.ts");
 const defaultSave = readText("src/data/defaultSave.ts");
 const saveSystem = readText("src/systems/SaveSystem.ts");
 const roomArrange = readText("src/scenes/RoomArrangeScene.ts");
+const mainRoom = readText("src/scenes/MainRoomScene.ts");
+const gameConfig = readText("src/game/config.ts");
 const packageJson = readText("package.json");
 const indexHtml = readText("index.html");
 
@@ -113,6 +115,11 @@ expect(packageJson.includes("vite build --base=/petpet/"), "Production build sho
 expect(indexHtml.includes("<title>petpet</title>"), "index.html title should be petpet");
 expect(assetKeys.includes("StartHero"), "AssetKeys should include the cleaned start screen hero");
 expect(assetKeys.includes("HomeBackground"), "AssetKeys should include the new home background");
+for (const iconKey of ["IconHome", "IconArrange", "IconCollection", "IconLetter", "IconSettings", "IconRecord"]) {
+  expect(assetKeys.includes(iconKey), `AssetKeys should include UI.${iconKey}`);
+}
+expect(mainRoom.includes("RecordBoardScene"), "MainRoomScene should expose the record board entry");
+expect(gameConfig.includes("RecordBoardScene"), "RecordBoardScene should be registered in the Phaser scene list");
 expect(assetKeys.includes("getFurnitureTextureKey(type: FurnitureType, rotation"), "Furniture texture lookup should account for rotation");
 expect(roomLayout.includes("blocksPlacement"), "Furniture placement definitions should mark non-blocking decor such as rugs and paintings");
 for (const typeName of ["Rug", "Painting", "CoffeeTable", "TvCabinet"]) {
@@ -181,6 +188,18 @@ for (const file of [
 for (const file of ["home_background.png", "home_title.png", "home_hero.png", "start_button_petpet.png", "settings_button_petpet.png"]) {
   const png = parsePng(`public/assets/start/${file}`, false);
   expect(png.width > 1 && png.height > 1, `${file} should be a valid start screen asset`);
+}
+
+for (const file of ["icon_home.png", "icon_arrange.png", "icon_collection.png", "icon_letter.png", "icon_settings.png", "icon_record.png"]) {
+  const png = parsePng(`public/assets/ui/petpet-icons/${file}`);
+  expect(png.width === 256 && png.height === 256, `${file} should be normalized to 256x256`);
+  const cornerAlpha = [
+    alphaAt(png, 0, 0),
+    alphaAt(png, png.width - 1, 0),
+    alphaAt(png, 0, png.height - 1),
+    alphaAt(png, png.width - 1, png.height - 1)
+  ];
+  expect(cornerAlpha.every((alpha) => alpha <= 8), `${file} should have transparent corners after background removal`);
 }
 
 for (const group of ["idle", "walk", "react", "relax", "sleep", "craft"]) {

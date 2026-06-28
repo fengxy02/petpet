@@ -10,6 +10,7 @@ import { DateSystem } from "../systems/DateSystem";
 import { GameFlowSystem } from "../systems/GameFlowSystem";
 import { DailyEventResult, RandomEventSystem } from "../systems/RandomEventSystem";
 import { LetterSystem } from "../systems/LetterSystem";
+import { OpeningReplySystem } from "../systems/OpeningReplySystem";
 import { SaveSystem } from "../systems/SaveSystem";
 import { AnimalIslandTheme } from "../ui/AnimalIslandTheme";
 import { UIButton } from "../ui/UIButton";
@@ -40,8 +41,10 @@ export class MainRoomScene extends Phaser.Scene {
     const room = new Room(this, save);
     const pot = new Pot(this, save.pot, save.growthStage);
     pot.syncToStagePlacement(save.growthStage);
+    this.drawEarlyGrowthHint(save, pot);
     if (save.growthStage === GrowthStage.BabyPet || (save.growthStage === GrowthStage.AdultPet && save.adultFormGenerated)) {
       this.pet = new Pet(this, save, room);
+      if (save.dayCount < 5) this.pet.disableInteractive();
     }
     for (const furniture of room.furniture) {
       furniture.on("pointerup", () => this.handleFurnitureClick(furniture.item));
@@ -61,12 +64,21 @@ export class MainRoomScene extends Phaser.Scene {
   }
 
   update(time: number): void {
+    if ((this.save?.dayCount ?? 0) < 5) return;
     this.pet?.update(time);
   }
 
   private handleFurnitureClick(item: FurnitureSaveData): void {
     const save = this.save;
     if (!save) return;
+    if (item.type === FurnitureType.Pot && save.dayCount <= 5) {
+      FloatingText.show(this, item.x, item.y - 92, this.getPotFeedback(save.dayCount));
+      return;
+    }
+    if (save.dayCount < 6) {
+      FloatingText.show(this, item.x, item.y - 80, save.dayCount <= 3 ? "现在先照看花盆就好。" : "它还在适应小屋，明天再试试。");
+      return;
+    }
     if (item.type === FurnitureType.Wardrobe && save.growthStage === GrowthStage.AdultPet && save.adultFormGenerated) {
       SaveSystem.saveGame(save);
       this.scene.start("WardrobeScene");
@@ -91,17 +103,25 @@ export class MainRoomScene extends Phaser.Scene {
     new StatusBar(this, 520, 30, "精力", save.pet.energy, 0xf5c31c).setDepth(822);
     new StatusBar(this, 750, 30, "亲密", save.pet.intimacy, 0x19c8b9).setDepth(822);
 
-    new UIButton(this, 1160, 140, "写信", () => this.scene.start("LetterScene"), 156, 50, { iconKey: AssetKeys.UI.IconLetter, iconSize: 26 }).setDepth(830);
-    new UIButton(this, 1160, 202, "收藏", () => this.scene.start("CollectionScene"), 156, 50, { iconKey: AssetKeys.UI.IconCollection, iconSize: 26 }).setDepth(830);
-    if (save.growthStage === GrowthStage.AdultPet && save.adultFormGenerated) {
-      new UIButton(this, 1160, 264, "换装", () => this.scene.start("WardrobeScene"), 156, 50, { iconKey: AssetKeys.UI.IconWardrobe, iconSize: 26 }).setDepth(830);
+    let menuY = 140;
+    const addMenuButton = (label: string, callback: () => void, iconKey: string): void => {
+      new UIButton(this, 1160, menuY, label, callback, 156, 50, { iconKey, iconSize: 30 }).setDepth(830);
+      menuY += 62;
+    };
+
+    addMenuButton("写信", () => this.scene.start("LetterScene"), AssetKeys.UI.IconLetter);
+    if (save.dayCount >= 6) {
+      addMenuButton("收藏", () => this.scene.start("CollectionScene"), AssetKeys.UI.IconCollection);
     }
-    new UIButton(this, 1160, 326, "设置", () => this.scene.start("SettingsScene", { returnScene: "MainRoomScene" }), 156, 50, {
-      iconKey: AssetKeys.UI.IconSettings,
-      iconSize: 26,
-      variant: "default"
-    }).setDepth(830);
-    new UIButton(this, 1160, 388, "布置", () => this.scene.start("RoomArrangeScene"), 156, 50, { iconKey: AssetKeys.UI.IconArrange, iconSize: 26 }).setDepth(830);
+    if (save.growthStage === GrowthStage.AdultPet && save.adultFormGenerated) {
+      addMenuButton("换装", () => this.scene.start("WardrobeScene"), AssetKeys.UI.IconWardrobe);
+    }
+    addMenuButton("设置", () => this.scene.start("SettingsScene", { returnScene: "MainRoomScene" }), AssetKeys.UI.IconSettings);
+    if (save.dayCount >= 6) {
+      addMenuButton("布置", () => this.scene.start("RoomArrangeScene"), AssetKeys.UI.IconArrange);
+    }
+    addMenuButton("记录", () => this.scene.start("RecordBoardScene"), AssetKeys.UI.IconRecord);
+
     if (save.seedPlanted && save.dayCount < 7) {
       new UIButton(this, 1160, 584, "进入下一天", () => this.continueToNextDay(), 176, 52, { iconKey: AssetKeys.UI.IconLeaf, iconSize: 26, variant: "primary", fontSize: 18 }).setDepth(830);
     }
@@ -127,6 +147,7 @@ export class MainRoomScene extends Phaser.Scene {
   }
 
   private tryDailyEvent(save: NonNullable<typeof this.save>): DailyEventResult {
+    if (save.dayCount < 6) return { checked: false, item: null, forced: false };
     const result = RandomEventSystem.tryGenerateDailyEvent(save);
     SaveSystem.saveGame(save);
     return result;
@@ -144,6 +165,15 @@ export class MainRoomScene extends Phaser.Scene {
           progress.read = true;
           SaveSystem.saveGame(save);
         }
+      });
+    }
+    if (OpeningReplySystem.shouldShowFirstReply(save)) {
+      const reply = OpeningReplySystem.getFirstReply(save);
+      modalNotices.push({
+        title: reply.title,
+        body: reply.body,
+        buttonText: "收好纸条",
+        onClose: () => OpeningReplySystem.markFirstReplyRead(save)
       });
     }
     if (dailyEventResult.item) {
@@ -175,9 +205,45 @@ export class MainRoomScene extends Phaser.Scene {
   }
 
   private getGoalHint(save: NonNullable<typeof this.save>): string {
-    if (save.dayCount <= 3) return "今日目标：照看花盆，明天再看看它长出什么。";
+    if (save.dayCount === 1) return "今天它还在睡觉。给它写一封信吧，明天也许会有变化。";
+    if (save.dayCount === 2) return "小芽冒出来了。看看花盆旁边有没有新的纸条。";
+    if (save.dayCount === 3) return "今日目标：照看这株奇怪的小芽，它好像快变成蘑菇了。";
+    if (save.dayCount === 4) return "今日目标：它有了小小的样子，先安静陪它待一会儿。";
+    if (save.dayCount === 5) return "今日目标：轻轻点一点它，看看它会怎么回应。";
     if (!LetterSystem.hasLetterForToday(save)) return "今日目标：写一封信，让它把今天记住。";
     if (save.growthStage === GrowthStage.AdultPet && save.adultFormGenerated) return "今日目标：陪它互动，收集小礼物，试试新的装扮。";
     return "今日目标：点一点家具，看看它喜欢在小屋里做什么。";
+  }
+
+  private drawEarlyGrowthHint(save: NonNullable<typeof this.save>, pot: Pot): void {
+    if (save.dayCount !== 1) return;
+    const bg = this.add.graphics().setDepth(760);
+    AnimalIslandTheme.drawCard(bg, pot.x - 220, pot.y - 190, 440, 76, {
+      fill: AnimalIslandTheme.colors.creamSoft,
+      border: AnimalIslandTheme.colors.borderLight,
+      radius: 24,
+      alpha: 0.9
+    });
+    this.add
+      .text(pot.x, pot.y - 152, "今天它还在睡觉。\n给它写一封信吧，明天也许会有变化。", {
+        ...AnimalIslandTheme.textStyle(18, AnimalIslandTheme.colors.bodyText),
+        align: "center",
+        lineSpacing: 5
+      })
+      .setOrigin(0.5)
+      .setDepth(761);
+  }
+
+  private getPotFeedback(dayCount: number): string {
+    if (dayCount === 2) return "小芽轻轻晃了一下。";
+    if (dayCount === 3) return "小芽的伞盖好像鼓起来了。";
+    if (dayCount >= 4) return "它正在学着醒来。";
+    const feedback = [
+      "土壤里安安静静的。",
+      "好像有什么正在慢慢醒来。",
+      "你感觉花盆变暖了一点。",
+      "它还没有发芽，但似乎听见了你的声音。"
+    ];
+    return feedback[Phaser.Math.Between(0, feedback.length - 1)];
   }
 }
