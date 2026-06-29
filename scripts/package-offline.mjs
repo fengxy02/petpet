@@ -245,8 +245,8 @@ findPort(startPort).then((port) => {
 
   server.listen(port, "127.0.0.1", () => {
     const targetUrl = "http://127.0.0.1:" + port + "/petpet/";
-    console.log("petpet 已启动：" + targetUrl);
-    console.log("关闭这个窗口即可停止游戏服务。");
+    console.log("petpet started: " + targetUrl);
+    console.log("Keep this window open while playing. Close it to stop.");
     openBrowser(targetUrl);
   });
 });
@@ -302,9 +302,8 @@ fs.mkdirSync(packageDir, { recursive: true });
 copyDir(path.join(root, "dist"), gameDir);
 fs.writeFileSync(path.join(packageDir, "server.cjs"), serverSource, "utf8");
 fs.writeFileSync(path.join(packageDir, "start-petpet.ps1"), launcherPs1.replace(/\n/g, "\r\n"), "utf8");
-fs.writeFileSync(path.join(packageDir, "启动游戏.bat"), launcherBat.replace(/\n/g, "\r\n"), "ascii");
 fs.writeFileSync(path.join(packageDir, "Launch petpet.bat"), launcherBat.replace(/\n/g, "\r\n"), "ascii");
-fs.writeFileSync(path.join(packageDir, "README_开始游戏.txt"), readme, "utf8");
+fs.writeFileSync(path.join(packageDir, "README.txt"), readme, "utf8");
 zipPackage();
 
 console.log(`Offline package folder: ${packageDir}`);

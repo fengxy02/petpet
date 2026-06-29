@@ -411,7 +411,7 @@ const DEFAULT_ADULT_FORM_ID = "ian_adult";
 const adultTextureSets: Record<string, AdultTextureSet> = {
   ian_adult: {
     idle: AssetKeys.Pet.Adult.IanIdle0,
-    idleFrames: [AssetKeys.Pet.Adult.IanIdle0, AssetKeys.Pet.Adult.IanSit0, AssetKeys.Pet.Adult.IanClick0, AssetKeys.Pet.Adult.IanSit0],
+    idleFrames: [AssetKeys.Pet.Adult.IanIdle0],
     walkFrames: [
       AssetKeys.Pet.Adult.IanWalk0,
       AssetKeys.Pet.Adult.IanWalk1,
