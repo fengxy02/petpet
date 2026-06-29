@@ -2,7 +2,15 @@ import Phaser from "phaser";
 import { clothingDatabase } from "../data/clothingDatabase";
 import { ClothingSlot, FloorId, FurnitureType, GrowthStage, PetSaveData, PetState, SaveData } from "../data/types";
 import { GameEvents } from "../game/GameEvents";
-import { getAdultClickAnimationKey, getAdultIdleKey, getAdultPoseKey, getAdultWalkAnimationKey, MushroomAnimationKeys, MushroomFrames } from "../utils/AssetKeys";
+import {
+  getAdultClickAnimationKey,
+  getAdultIdleAnimationKey,
+  getAdultIdleKey,
+  getAdultPoseKey,
+  getAdultWalkAnimationKey,
+  MushroomAnimationKeys,
+  MushroomFrames
+} from "../utils/AssetKeys";
 import { DepthSorter } from "../utils/DepthSorter";
 import { weightedPick } from "../utils/MathUtils";
 import { Furniture } from "./Furniture";
@@ -42,7 +50,7 @@ export class Pet extends Phaser.GameObjects.Container {
     const texture = this.isAdult() ? getAdultIdleKey(this.adultFormId()) : MushroomFrames.idle[0];
     this.sprite = scene.add.sprite(0, 0, texture).setOrigin(0.5, 1).setScale(this.baseSpriteScale());
     this.add(this.sprite);
-    if (this.isAdult()) this.applyClothing();
+    this.applyClothing();
     scene.add.existing(this);
     DepthSorter.applyByY(this);
     this.applyPetState(PetState.Idle);
@@ -89,7 +97,7 @@ export class Pet extends Phaser.GameObjects.Container {
       const item = clothingDatabase.find((candidate) => candidate.id === id);
       if (!item) continue;
       const offset = this.offsetForSlot(item.slot);
-      const sprite = this.scene.add.sprite(offset.x, offset.y, item.imageKey).setOrigin(0.5).setScale(0.85);
+      const sprite = this.scene.add.sprite(offset.x, offset.y, item.imageKey).setOrigin(0.5).setScale(this.isAdult() ? 0.85 : 0.56);
       this.add(sprite);
       this.clothingSprites.push(sprite);
     }
@@ -246,6 +254,8 @@ export class Pet extends Phaser.GameObjects.Container {
 
   private adultAnimationForState(state: PetState): string | undefined {
     switch (state) {
+      case PetState.Idle:
+        return getAdultIdleAnimationKey(this.adultFormId());
       case PetState.Walking:
       case PetState.Exercising:
         return getAdultWalkAnimationKey(this.adultFormId());
@@ -446,6 +456,22 @@ export class Pet extends Phaser.GameObjects.Container {
   }
 
   private offsetForSlot(slot: ClothingSlot): Phaser.Math.Vector2 {
+    if (!this.isAdult()) {
+      switch (slot) {
+        case ClothingSlot.Hat:
+          return new Phaser.Math.Vector2(0, -122);
+        case ClothingSlot.HeadAccessory:
+          return new Phaser.Math.Vector2(42, -104);
+        case ClothingSlot.NeckAccessory:
+          return new Phaser.Math.Vector2(0, -58);
+        case ClothingSlot.BodyAccessory:
+          return new Phaser.Math.Vector2(36, -48);
+        case ClothingSlot.TailAccessory:
+          return new Phaser.Math.Vector2(-52, -46);
+        default:
+          return new Phaser.Math.Vector2(0, 0);
+      }
+    }
     switch (slot) {
       case ClothingSlot.Hat:
         return new Phaser.Math.Vector2(0, -188);

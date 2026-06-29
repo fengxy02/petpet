@@ -5,6 +5,8 @@ import {
   adultAnimationFormIds,
   getAdultClickAnimationKey,
   getAdultClickFrameKeys,
+  getAdultIdleAnimationKey,
+  getAdultIdleFrameKeys,
   getAdultWalkAnimationKey,
   getAdultWalkFrameKeys,
   MushroomAnimationKeys,
@@ -95,6 +97,15 @@ export class PreloadScene extends Phaser.Scene {
       });
     }
     for (const formId of adultAnimationFormIds) {
+      const idleKey = getAdultIdleAnimationKey(formId);
+      if (!this.anims.exists(idleKey)) {
+        this.anims.create({
+          key: idleKey,
+          frames: getAdultIdleFrameKeys(formId).map((key) => ({ key })),
+          frameRate: formId === "ian_adult" ? 2.2 : 1,
+          repeat: -1
+        });
+      }
       const walkKey = getAdultWalkAnimationKey(formId);
       if (!this.anims.exists(walkKey)) {
         this.anims.create({

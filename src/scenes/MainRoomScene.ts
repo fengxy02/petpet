@@ -79,7 +79,7 @@ export class MainRoomScene extends Phaser.Scene {
       FloatingText.show(this, item.x, item.y - 80, save.dayCount <= 3 ? "现在先照看花盆就好。" : "它还在适应小屋，明天再试试。");
       return;
     }
-    if (item.type === FurnitureType.Wardrobe && save.growthStage === GrowthStage.AdultPet && save.adultFormGenerated) {
+    if (item.type === FurnitureType.Wardrobe && (save.growthStage === GrowthStage.BabyPet || (save.growthStage === GrowthStage.AdultPet && save.adultFormGenerated))) {
       SaveSystem.saveGame(save);
       this.scene.start("WardrobeScene");
       return;
@@ -113,11 +113,12 @@ export class MainRoomScene extends Phaser.Scene {
     if (save.dayCount >= 6) {
       addMenuButton("收藏", () => this.scene.start("CollectionScene"), AssetKeys.UI.IconCollection);
     }
-    if (save.growthStage === GrowthStage.AdultPet && save.adultFormGenerated) {
+    const canDecorate = save.growthStage === GrowthStage.BabyPet || (save.growthStage === GrowthStage.AdultPet && save.adultFormGenerated);
+    if (canDecorate) {
       addMenuButton("换装", () => this.scene.start("WardrobeScene"), AssetKeys.UI.IconWardrobe);
     }
     addMenuButton("设置", () => this.scene.start("SettingsScene", { returnScene: "MainRoomScene" }), AssetKeys.UI.IconSettings);
-    if (save.dayCount >= 6) {
+    if (canDecorate) {
       addMenuButton("布置", () => this.scene.start("RoomArrangeScene"), AssetKeys.UI.IconArrange);
     }
     addMenuButton("记录", () => this.scene.start("RecordBoardScene"), AssetKeys.UI.IconRecord);

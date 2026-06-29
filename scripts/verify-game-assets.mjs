@@ -111,6 +111,8 @@ const openingStory = readText("src/scenes/OpeningStoryScene.ts");
 const openingReply = readText("src/systems/OpeningReplySystem.ts");
 const letterScene = readText("src/scenes/LetterScene.ts");
 const settingsScene = readText("src/scenes/SettingsScene.ts");
+const textModal = readText("src/ui/TextModal.ts");
+const adultFormScene = readText("src/scenes/AdultFormScene.ts");
 const packageJson = readText("package.json");
 const indexHtml = readText("index.html");
 
@@ -125,6 +127,16 @@ expect(defaultSave.includes("openingStoryCompleted: false"), "New saves should n
 expect(defaultSave.includes("seedPlanted: false"), "New saves should wait for the opening seed planting");
 expect(saveSystem.includes("if ((data.version ?? 0) < SAVE_VERSION)") && saveSystem.includes("return reset"), "Old saves should reset to Day 1 and replay the opening story");
 expect(gameConfig.includes("OpeningStoryScene"), "OpeningStoryScene should be registered in the Phaser scene list");
+expect(assetKeys.includes("EnvelopeDialogFrame"), "AssetKeys should expose the envelope dialog frame");
+expect(assetKeys.includes("OpeningPot") && assetKeys.includes("OpeningSeed"), "AssetKeys should expose cleaned opening pot and seed assets");
+expect(openingStory.includes("EnvelopeDialogFrame"), "Opening story should use the envelope dialog frame");
+expect(openingStory.includes("Growth.OpeningPot") && openingStory.includes("Growth.OpeningSeed"), "Opening story should use cleaned pot and seed assets");
+expect(!openingStory.includes('title: "旁白"'), "Opening story should not render a narrator title");
+expect(textModal.includes("bodyHeight") && textModal.includes("wheelHandler"), "TextModal should support scrollable long body text");
+expect(mainRoom.includes("const canDecorate") && mainRoom.includes("GrowthStage.BabyPet"), "BabyPet should unlock wardrobe and room arrangement entries");
+expect(wardrobe.includes("GrowthStage.BabyPet") && wardrobe.includes("MushroomAnimationKeys.Idle"), "WardrobeScene should support BabyPet previews");
+expect(adultFormScene.includes("getAdultIdleAnimationKey") && adultFormScene.includes("addScrollableText"), "AdultFormScene should use animated adult preview and scrollable text");
+expect(preload.includes("getAdultIdleAnimationKey") && preload.includes("getAdultIdleFrameKeys"), "PreloadScene should create adult idle animations");
 for (const text of ["打开信封", "看看种子", "种进花盆", "开始照顾它"]) {
   expect(openingStory.includes(text), `Opening story should include ${text}`);
 }
@@ -223,6 +235,28 @@ for (const file of ["icon_home.png", "icon_arrange.png", "icon_collection.png", 
     alphaAt(png, png.width - 1, png.height - 1)
   ];
   expect(cornerAlpha.every((alpha) => alpha <= 8), `${file} should have transparent corners after background removal`);
+}
+
+for (const file of ["opening_seed.png", "opening_pot.png"]) {
+  const png = parsePng(`public/assets/growth/${file}`);
+  const cornerAlpha = [
+    alphaAt(png, 0, 0),
+    alphaAt(png, png.width - 1, 0),
+    alphaAt(png, 0, png.height - 1),
+    alphaAt(png, png.width - 1, png.height - 1)
+  ];
+  expect(cornerAlpha.every((alpha) => alpha <= 8), `${file} should have transparent corners after background removal`);
+}
+
+{
+  const png = parsePng("public/assets/ui/letter_envelope_background.png");
+  const cornerAlpha = [
+    alphaAt(png, 0, 0),
+    alphaAt(png, png.width - 1, 0),
+    alphaAt(png, 0, png.height - 1),
+    alphaAt(png, png.width - 1, png.height - 1)
+  ];
+  expect(cornerAlpha.every((alpha) => alpha <= 8), "letter_envelope_background.png should have transparent corners after checkerboard removal");
 }
 
 for (const group of ["idle", "walk", "react", "relax", "sleep", "craft"]) {

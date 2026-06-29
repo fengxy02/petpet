@@ -48,7 +48,9 @@ export const AssetKeys = {
     PotSoil: "growth_pot_soil",
     PotSproutSmall: "growth_pot_sprout_small",
     PotSproutGrowing: "growth_pot_sprout_growing",
-    Seed: "growth_seed"
+    Seed: "growth_seed",
+    OpeningPot: "growth_opening_pot",
+    OpeningSeed: "growth_opening_seed"
   },
   Pet: {
     BabyIdle0: "pet_baby_idle_0",
@@ -168,7 +170,8 @@ export const AssetKeys = {
     DividerBrown: "ui_divider_brown",
     DividerYellow: "ui_divider_yellow",
     WaveYellow: "ui_wave_yellow",
-    LetterEnvelope: "ui_letter_envelope"
+    LetterEnvelope: "ui_letter_envelope",
+    EnvelopeDialogFrame: "ui_envelope_dialog_frame"
   }
 } as const;
 
@@ -227,11 +230,13 @@ export const AssetManifest: AssetManifestItem[] = [
   { key: AssetKeys.Room.Stairs, path: assetPath("assets/room/stairs.png"), kind: "room", width: 180, height: 210 },
   { key: AssetKeys.Room.Railing, path: assetPath("assets/room/railing.png"), kind: "room" },
   { key: AssetKeys.Room.LightShadow, path: assetPath("assets/room/light_shadow.png"), kind: "room" },
-  { key: AssetKeys.Growth.PotEmpty, path: assetPath("assets/growth/pot_empty.png"), kind: "growth", width: 96, height: 110 },
-  { key: AssetKeys.Growth.PotSoil, path: assetPath("assets/growth/pot_soil_mushroom.png"), kind: "growth", width: 96, height: 110 },
+  { key: AssetKeys.Growth.PotEmpty, path: assetPath("assets/growth/pot_empty.png"), kind: "growth", width: 160, height: 140 },
+  { key: AssetKeys.Growth.PotSoil, path: assetPath("assets/growth/pot_soil.png"), kind: "growth", width: 160, height: 140 },
   { key: AssetKeys.Growth.PotSproutSmall, path: assetPath("assets/growth/pot_sprout_small.png"), kind: "growth", width: 96, height: 126 },
   { key: AssetKeys.Growth.PotSproutGrowing, path: assetPath("assets/growth/pot_sprout_growing.png"), kind: "growth", width: 96, height: 140 },
-  { key: AssetKeys.Growth.Seed, path: assetPath("assets/animal-island-ui/icons/icon-leaf.png"), kind: "growth", width: 42, height: 42 },
+  { key: AssetKeys.Growth.Seed, path: assetPath("assets/growth/opening_seed.png"), kind: "growth", width: 150, height: 150 },
+  { key: AssetKeys.Growth.OpeningPot, path: assetPath("assets/growth/opening_pot.png"), kind: "growth", width: 260, height: 220 },
+  { key: AssetKeys.Growth.OpeningSeed, path: assetPath("assets/growth/opening_seed.png"), kind: "growth", width: 150, height: 150 },
   ...createMushroomManifest("idle"),
   ...createMushroomManifest("walk"),
   ...createMushroomManifest("react"),
@@ -342,7 +347,8 @@ export const AssetManifest: AssetManifestItem[] = [
   { key: AssetKeys.UI.DividerBrown, path: assetPath("assets/animal-island-ui/dividers/divider-line-brown.svg"), kind: "ui", width: 220, height: 16 },
   { key: AssetKeys.UI.DividerYellow, path: assetPath("assets/animal-island-ui/dividers/divider-line-yellow.svg"), kind: "ui", width: 220, height: 16 },
   { key: AssetKeys.UI.WaveYellow, path: assetPath("assets/animal-island-ui/dividers/wave-yellow.svg"), kind: "ui", width: 240, height: 36 },
-  { key: AssetKeys.UI.LetterEnvelope, path: assetPath("assets/ui/letter_envelope_background.png"), kind: "ui", width: 540, height: 720 }
+  { key: AssetKeys.UI.LetterEnvelope, path: assetPath("assets/ui/letter_envelope_background.png"), kind: "ui", width: 540, height: 720 },
+  { key: AssetKeys.UI.EnvelopeDialogFrame, path: assetPath("assets/ui/letter_envelope_background.png"), kind: "ui", width: 540, height: 720 }
 ];
 
 type FurnitureTextureSet = {
@@ -391,6 +397,7 @@ type AdultPose = "idle" | "sit" | "sleep" | "play" | "click";
 
 type AdultTextureSet = {
   idle: string;
+  idleFrames?: string[];
   walkFrames: string[];
   sit?: string;
   sleep?: string;
@@ -404,6 +411,7 @@ const DEFAULT_ADULT_FORM_ID = "ian_adult";
 const adultTextureSets: Record<string, AdultTextureSet> = {
   ian_adult: {
     idle: AssetKeys.Pet.Adult.IanIdle0,
+    idleFrames: [AssetKeys.Pet.Adult.IanIdle0, AssetKeys.Pet.Adult.IanSit0, AssetKeys.Pet.Adult.IanClick0, AssetKeys.Pet.Adult.IanSit0],
     walkFrames: [
       AssetKeys.Pet.Adult.IanWalk0,
       AssetKeys.Pet.Adult.IanWalk1,
@@ -453,6 +461,10 @@ export const AdultAnimationKeys = {
   IanClick: "pet_adult_ian_adult_click"
 } as const;
 
+export function getAdultIdleAnimationKey(formId?: string): string {
+  return `pet_adult_${resolveAdultFormId(formId)}_idle`;
+}
+
 export function getAdultIdleKey(formId?: string): string {
   return resolveAdultTextureSet(formId).idle;
 }
@@ -473,6 +485,11 @@ export function getAdultClickAnimationKey(formId?: string): string {
 export function getAdultWalkFrameKeys(formId?: string): string[] {
   const set = resolveAdultTextureSet(formId);
   return set.walkFrames.length > 0 ? set.walkFrames : [set.idle];
+}
+
+export function getAdultIdleFrameKeys(formId?: string): string[] {
+  const set = resolveAdultTextureSet(formId);
+  return set.idleFrames ?? [set.idle];
 }
 
 export function getAdultClickFrameKeys(formId?: string): string[] {
